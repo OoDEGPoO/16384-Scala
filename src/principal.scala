@@ -1,7 +1,6 @@
-object Pruebas16384 {
-  println("Welcome to the Scala workshit")
-  // Tableros cuadrados
-  var size:Int = 4
+
+
+object principal {
   
   def rellenaLista(long:Int)(valor:Int):List[Int] = {
   	if (long == 0) Nil
@@ -71,32 +70,6 @@ object Pruebas16384 {
   
   def transpuesta(l:List[Int], s:Int):List[Int] = transpuesta_aux(l, s)(1, 1)
   
-  var lista:List[Int] = rellenaTablero(size)
-  
-  def imprimir(l: List[Int], s:Int): Unit = {
-  	if (!(l.length == 0))
-  		(l.length % s) match {
-  			case 1 => {println(l.head); imprimir(l.tail, s);}
-  			case _ => {print(l.head + "\t"); imprimir(l.tail, s);}
-  		}
-  }
-  
-  imprimir(lista, size)
-  
-  lista = introFicha(3, 2, 4, lista, size)
-
-/* Basurilla
-	//Cuantas posiciones a la derecha de X está el siguiente equivalente
-	def buscaDch(l:List[Int], s:Int, x:Int, pos:Int):Int = {
-		if (l.length == 0 || (l.length % s == 0)) 0 //Si está vacío o si se busca ya en la siguiente fila
-		else
-			if (l.head == x) pos + 1
-			else
-				if (l.head == 0) buscaDch(l.tail, s, x, pos + 1)
-				else 0
-	}*/
-  
-  //Suma con el siguiente valor inmediato siempre y cuando sean equivalentes
   def suma(l:List[Int], s:Int):List[Int] = {
   	if (l.length == 0) Nil
   	else
@@ -144,29 +117,43 @@ object Pruebas16384 {
   
   def abajo(l:List[Int], s:Int):List[Int] = transpuesta(derecha(transpuesta(l, s), s), s)
   
-  lista = introFicha(2, 3, 2, lista, size)
-  lista = introFicha(1, 2, 8, lista, size)
-  lista = introFicha(1, 1, 2, lista, size)
-  lista = introFicha(2, 1, 2, lista, size)
-	lista = introFicha(3, 1, 2, lista, size)
-  lista = introFicha(4, 1, 2, lista, size)
+  def imprimir(l: List[Int], s:Int): Unit = {
+  	if (!(l.length == 0))
+  		(l.length % s) match {
+  			case 1 => {println(l.head); imprimir(l.tail, s);}
+  			case _ => {print(l.head + "\t"); imprimir(l.tail, s);}
+  		}
+  }
+  
+  def main(args: Array[String]):Unit = {
+    var size:Int = 4
+    var tablero:List[Int] = rellenaTablero(size)
     
-
-	println("normal")
-  imprimir(lista, size)
-  println("derecha")
-  lista = derecha(lista, size)
-  imprimir(lista, size)
-  println("izquierda")
-  lista = izquierda(lista, size)
-  imprimir(lista, size)
-  println("arriba")
-  lista = arriba(lista, size)
-  imprimir(lista, size)
-  println("intro Ficha")
-  lista = introFicha(2, 4, 2, lista, size)
-  imprimir(lista, size)
-  println("abajo")
-  lista = abajo(lista, size)
-  imprimir(lista, size)
+    imprimir(tablero, size)
+    tablero = introFicha(3, 2, 4, tablero, size)
+    tablero = introFicha(2, 3, 2, tablero, size)
+    tablero = introFicha(1, 2, 8, tablero, size)
+    tablero = introFicha(1, 1, 2, tablero, size)
+    tablero = introFicha(2, 1, 2, tablero, size)
+  	tablero = introFicha(3, 1, 2, tablero, size)
+    tablero = introFicha(4, 1, 2, tablero, size)
+    
+  	println("normal")
+    imprimir(tablero, size)
+    println("derecha")
+    tablero = derecha(tablero, size)
+    imprimir(tablero, size)
+    println("izquierda")
+    tablero = izquierda(tablero, size)
+    imprimir(tablero, size)
+    println("arriba")
+    tablero = arriba(tablero, size)
+    imprimir(tablero, size)
+    println("intro Ficha")
+    tablero = introFicha(2, 4, 2, tablero, size)
+    imprimir(tablero, size)
+    println("abajo")
+    tablero = abajo(tablero, size)
+    imprimir(tablero, size)
+  }
 }
