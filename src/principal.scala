@@ -173,6 +173,48 @@ object principal {
   		}
   }
   
+  def linea(s:Int):Unit ={
+  	if (s == 0) print("\n")
+  	else {print("-\t"); linea(s-1)}
+  }
+  
+  def vidas(v:Int):Unit ={
+  	if (v == 0) print("\n")
+  	else {print(" <3 "); vidas(v-1)}
+  }
+  
+  def bienvenidaIU():Unit ={
+		print(".----------------.  .----------------.  .----------------.  .----------------.  .----------------.\n");
+		print("| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n");
+		print("| |     __       | || |    ______    | || |    ______    | || |     ____     | || |   _    _     | |\n");
+		print("| |    /  |      | || |  .' ____ \\   | || |   / ____ `.  | || |   .' __ '.   | || |  | |  | |    | |\n");
+		print("| |    `| |      | || |  | |____\\_|  | || |   `'  __) |  | || |   | (__) |   | || |  | |__| |_   | |\n");
+		print("| |     | |      | || |  | '____`'.  | || |   _ | __ '.  | || |   .`____'.   | || |  |____   _|  | |\n");
+		print("| |    _| |_     | || |  | (____) |  | || |  | \\____) |  | || |  | (____) |  | || |      _| |_   | |\n");
+		print("| |   |_____|    | || |  '.______.'  | || |   \\______.'  | || |  `.______.'  | || |     |_____|  | |\n");
+		print("| |              | || |              | || |              | || |              | || |              | |\n");
+		print("| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n");
+		print("'----------------'  '----------------'  '----------------'  '----------------'  '----------------' \n\n");
+		print("                       Created by: Diego-Edgar Gracia & Daniel Lopez                                \n\n");
+  }
+  
+  def encabezadoIU(s:Int, p:Int, best:Int):Unit ={
+  	println("Punt: " + p + "\tMejor: " + best)
+  	linea(s)
+  }
+  
+  def pieIU(s:Int, v:Int):Unit ={
+  	linea(s)
+  	print("VIDAS:\t"); vidas(v)
+  	linea(s)
+  }
+  
+  def IU(l:List[Int], s:Int, v:Int, p:Int, b:Int):Unit ={
+  	encabezadoIU(s, p, b)
+  	imprimir(l, s)
+  	pieIU(s, v)
+  }
+  
   def main(args: Array[String]):Unit = {
     var size:Int = 4
     var tablero:List[Int] = rellenaTablero(size)
