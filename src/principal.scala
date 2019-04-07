@@ -2,6 +2,11 @@
 
 object principal {
   
+  def mayor(x:Int)(y:Int):Int = {
+    if (x > y) x
+    else y
+  }
+  
   def rellenaLista(long:Int)(valor:Int):List[Int] = {
   	if (long == 0) Nil
   	else valor::rellenaLista(long-1)(valor)
@@ -112,15 +117,15 @@ object principal {
         introSemilla_aux(tablero,1,dif1,s)
       }
       case 2=>{
-        introSemilla_aux(tablero,3,dif2,s)      
+        introSemilla_aux(tablero,3,dif2,s)
       }
       case 3=>{
-        introSemilla_aux(tablero,5,dif3_4,s)  
+        introSemilla_aux(tablero,5,dif3_4,s)
       }
       case 4=>{
-        introSemilla_aux(tablero,6,dif3_4,s)      
+        introSemilla_aux(tablero,6,dif3_4,s)
       }
-    }   
+    }
   }
   
   //Suma de todos los elementos de una lista 
@@ -183,12 +188,10 @@ object principal {
   
   //Comprobamos si se pueden realizar mas movimientos
   def comprobarMovimientos(tablero: List[Int], s:Int): Boolean={
-    val der =derecha(tablero,s)
-    val izq= izquierda(tablero,s)
-    val ab= abajo(tablero,s)
-    val arr= arriba(tablero,s)
-    
-    equivalentes(tablero)(der) && equivalentes(tablero)(izq) && equivalentes(tablero)(ab) && equivalentes(tablero)(arr) 
+    equivalentes(tablero)(subLista(derecha(tablero,s), s*s)) &&  //Dch
+    equivalentes(tablero)(subLista(izquierda(tablero,s), s*s)) &&  //Izq
+    equivalentes(tablero)(subLista(abajo(tablero,s), s*s)) &&  //Abajo
+    equivalentes(tablero)(subLista(arriba(tablero,s), s*s))  //Arriba
   }
   
   def imprimir(l: List[Int], s:Int): Unit = {
@@ -226,7 +229,7 @@ object principal {
   }
   
   def encabezadoIU(s:Int, p:Int, best:Int):Unit ={
-  	println("Punt: " + p + "\tMejor: " + best)
+  	println("Punt: " + p + "\tMejor: " + best + "\t(WASD para mover el tablero\tO para Salir)")
   	linea(s)
   }
   
@@ -262,17 +265,155 @@ object principal {
       else if(tecla=='d' || tecla=='D'){
         4
       }
+      //Salir-->5
+      else if(tecla=='o' || tecla=='O'){
+        5
+      }
       else{
-        -1
+        reconocerTeclado()
       }
   }
-  /*
+  
+  def dificultad():Int={
+	  print("                       --------- SELECCIONA LA DIFICULTAD ----------                                \n\n");
+    val tecla=scala.io.StdIn.readChar()
+    if(tecla=='1'){
+      1
+    }
+    else if(tecla=='2'){
+      2
+    }
+    else if(tecla=='3'){
+      3
+    }
+    else if(tecla=='4'){
+      4
+    }
+    else{
+      dificultad()
+    }
+  }
+  
+  def iniciaTablero(dif:Int):List[Int] = dif match {
+    case 1 => introSemilla_aux(rellenaTablero(4), 2, List(2), 4)
+    case 2 => introSemilla_aux(rellenaTablero(9), 4, List(2, 4), 9)
+    case 3 => introSemilla_aux(rellenaTablero(14), 6, List(2, 4, 8), 14)
+    case 4 => introSemilla_aux(rellenaTablero(17), 6, List(2, 4, 8), 17)
+  }
+  
   //se llama a si mismo realizando cada ejecución de juego, y devuelve finalmente la puntuación obtenida
-  def partida(t:List[Int], s:Int, v:Int, p:Int, b:Int):Int ={
-    
-  }*/
+  //t-tablero  /  s-size  /  v-vidas  /  p-puntos  /  b-mejores puntos  /  d-dificultad
+  def partida(t:List[Int], s:Int, v:Int, p:Int, b:Int, d:Int):Int ={
+    reconocerTeclado() match {
+      case 1 => {
+        val l1:List[Int] = arriba(t, s)
+        val puntos:Int = p + sumatorio(subLista(l1, (s*s)+1, l1.length))
+        val l2:List[Int] = introSemillas(subLista(l1, s*s), d, s)
+        val best:Int = mayor(puntos)(b)
+        
+        IU(l2, s, v, puntos, best)
+        if (comprobarMovimientos(l2, s)) puntos
+        else partida(l2, s, v, puntos, best, d)
+        }
+      case 2 => {
+        val l1:List[Int] = izquierda(t, s)
+        val puntos:Int = p + sumatorio(subLista(l1, (s*s)+1, l1.length))
+        val l2:List[Int] = introSemillas(subLista(l1, s*s), d, s)
+        val best:Int = mayor(puntos)(b)
+        
+        IU(l2, s, v, puntos, best)
+        if (comprobarMovimientos(l2, s)) puntos
+        else partida(l2, s, v, puntos, best, d)
+        }
+      case 3 => {
+        val l1:List[Int] = abajo(t, s)
+        val puntos:Int = p + sumatorio(subLista(l1, (s*s)+1, l1.length))
+        val l2:List[Int] = introSemillas(subLista(l1, s*s), d, s)
+        val best:Int = mayor(puntos)(b)
+        
+        IU(l2, s, v, puntos, best)
+        if (comprobarMovimientos(l2, s)) puntos
+        else partida(l2, s, v, puntos, best, d)
+        }
+      case 4 => {
+        val l1:List[Int] = derecha(t, s)
+        val puntos:Int = p + sumatorio(subLista(l1, (s*s)+1, l1.length))
+        val l2:List[Int] = introSemillas(subLista(l1, s*s), d, s)
+        val best:Int = mayor(puntos)(b)
+        
+        IU(l2, s, v, puntos, best)
+        if (comprobarMovimientos(l2, s)) puntos
+        else partida(l2, s, v, puntos, best, d)
+        }
+      case 5 => -p
+      case _ => partida(t, s, v, p, b, d)
+    }
+  }
+  
+  def coin(vidas:Int, best:Int, dif:Int):Int = {
+    if (vidas > 0) {
+      dif match {
+        case 1 => {
+          val t:List[Int] = iniciaTablero(1)
+          IU(t, 4, 2, 0, best)
+          val b:Int = mayor(partida(t , 4, vidas, 0, best, 1))(best)
+          if (b >= 0) coin (vidas-1, b, dif)
+          else -b
+        }
+        case 2 => {
+          val t:List[Int] = iniciaTablero(2)
+          IU(t, 9, 2, 0, best)
+          val b:Int = mayor(partida(t , 9, vidas, 0, best, 2))(best)
+          if (b >= 0) coin (vidas-1, b, dif)
+          else -b
+        }
+        case 3 => {
+          val t:List[Int] = iniciaTablero(3)
+          IU(t, 14, 2, 0, best)
+          val b:Int = mayor(partida(t , 14, vidas, 0, best, 3))(best)
+          if (b >= 0) coin (vidas-1, b, dif)
+          else -b
+        }
+        case 4 => {
+          val t:List[Int] = iniciaTablero(4)
+          IU(t, 17, 2, 0, best)
+          val b:Int = mayor(partida(t , 17, vidas, 0, best, 4))(best)
+          if (b >= 0) coin (vidas-1, b, dif)
+          else -b
+        }
+      }
+    }
+    else best
+  }
   
   def main(args: Array[String]):Unit = {
+    bienvenidaIU
+    dificultad match {
+      case 1 => {
+        val b:Int = coin(3, 0, 1)
+        print("                       ---------         GAME OVER        ----------                                \n\n");
+        println("Mejor Puntuacion: " + b)
+      }
+      case 2 => {
+        val b:Int = coin(3, 0, 2)
+        print("                       ---------         GAME OVER        ----------                                \n\n");
+        println("Mejor Puntuacion: " + b)
+      }
+      case 3 => {
+        val b:Int = coin(3, 0, 3)
+        print("                       ---------         GAME OVER        ----------                                \n\n");
+        println("Mejor Puntuacion: " + b)
+      }
+      case 4 => {
+        val b:Int = coin(3, 0, 4)
+        print("                       ---------         GAME OVER        ----------                                \n\n");
+        println("Mejor Puntuacion: " + b)
+      }
+      case _ => {
+        println("ERROR")
+      }
+    }
+    /*
     var size:Int = 4
     var tablero:List[Int] = rellenaTablero(size)
     var puntuacion:Int = 0
@@ -320,6 +461,6 @@ object principal {
     tablero = derecha(tablero, size)
     puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
     tablero = subLista(tablero, size*size)
-    IU(tablero, size, nvidas, puntuacion, 0)
+    IU(tablero, size, nvidas, puntuacion, 0)*/
   }
 }
