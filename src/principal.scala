@@ -11,6 +11,7 @@ object principal {
   	rellenaLista(s * s)(0)
   }
   
+  //Si son la misma lista
   def equivalentes(m:List[Int])(n:List[Int]):Boolean ={
   	if (m.length != n.length) false
   	else
@@ -56,6 +57,19 @@ object principal {
   	else obtener(x+((y-1)*s), l)
   }
   
+  //devuelve la sublista desde el principio de l hasta pos, incluido
+  def subLista(l:List[Int], pos:Int):List[Int] = {
+    if (pos == 0 || l.length == 0) Nil
+    else l.head::subLista(l.tail, pos -1)
+  }
+  
+  //devuelve la sublista de l desde ini hasta fin, incluidos
+  def subLista(l:List[Int], ini:Int, fin:Int):List[Int] = {
+    if (ini == 1 || l.length == 0) subLista(l, fin)
+    else subLista(l.tail, ini-1, fin-1)
+  }
+  
+  //lista invertida en orden
   def invertir(l:List[Int]):List[Int] = {
   	if (l.length == 0) Nil
   	else invertir(l.tail):::l.head::Nil
@@ -68,6 +82,7 @@ object principal {
   		else getFicha(l, s)(y, x)::transpuesta_aux(l, s)(x+1, y)
   }
   
+  //Transpuesta de la matriz cuadrada l (se introduce linealizada)
   def transpuesta(l:List[Int], s:Int):List[Int] = transpuesta_aux(l, s)(1, 1)
   
   //Introduce la semilla de forma recursiva
@@ -108,13 +123,20 @@ object principal {
     }   
   }
   
-  def suma(l:List[Int], s:Int):List[Int] = {
-  	if (l.length == 0) Nil
+  //Suma de todos los elementos de una lista 
+  def sumatorio(l:List[Int]):Int = {
+    if (l.length == 0) 0
+    else l.head+sumatorio(l.tail)
+  }
+  
+  //Suma con el siguiente valor inmediato siempre y cuando sean equivalentes
+  def suma(l:List[Int], s:Int)(p:List[Int]):List[Int] = {
+  	if (l.length == 0) p
   	else
-  		if ((l.head == 0) || (l.length % s == 1)) l.head::suma(l.tail, s)
+  		if ((l.head == 0) || (l.length % s == 1)) l.head::suma(l.tail, s)(p)
   		else
-  			if (l.head == l.tail.head) l.head*2::suma(0::l.tail.tail, s)
-  			else l.head::suma(l.tail, s)
+  			if (l.head == l.tail.head) l.head*2::suma(0::l.tail.tail, s)(l.head*2::p)
+  			else l.head::suma(l.tail, s)(p)
   }
   
   def mover(l:List[Int], s:Int):List[Int] = {
@@ -126,34 +148,38 @@ object principal {
   			else l.head::mover(l.tail, s)
   }
   
+  //Mientras se pueda seguir moviendo, mueve
+  def mueve(l:List[Int], s:Int):List[Int] = {
+  	val laux:List[Int] = mover(l, s)
+  	if (equivalentes(l)(laux)) laux
+  	else mueve(laux, s)
+  }
+  
+  //Pasos del movimiento de las fichas a la dch
   def movimiento(l:List[Int], s:Int):List[Int] = {
-  	var l0:List[Int] = l
-  	var l1:List[Int] = l
-  	
-  	do {
-  		l0 = l1;
-  		l1 = mover(l0, s);
-  	} while(!(equivalentes(l0)(l1)));
-  	
-  	l1 = invertir(l1)
-  	l1 = suma(l1, s);
-  	l1 = invertir(l1)
-  	
-  	do {
-  		l0 = l1;
-  		l1 = mover(l0, s);
-  	} while(!(equivalentes(l0)(l1)));
-  	
-  	l1
+    val sum:List[Int] = suma(invertir(mueve(l, s)), s)(Nil)
+    val punt:List[Int] = subLista(sum, (s*s)+1, sum.length)
+    
+  	val t:List[Int] = (invertir(subLista(sum, s*s)))
+  	mueve(t, s):::punt
   }
   
   def derecha(l:List[Int], s:Int):List[Int] = movimiento(l, s)
   
-  def izquierda(l:List[Int], s:Int):List[Int] = invertir(movimiento(invertir(l), s))
+  def izquierda(l:List[Int], s:Int):List[Int] = {
+  	val aux:List[Int] = movimiento(invertir(l), s)
+  	invertir(subLista(aux, s*s)):::subLista(aux, (s*s)+1, aux.length)
+  }
   
-  def arriba(l:List[Int], s:Int):List[Int] = transpuesta(izquierda(transpuesta(l, s), s), s)
+  def arriba(l:List[Int], s:Int):List[Int] = {
+  	val aux:List[Int] = izquierda(transpuesta(l, s), s)
+  	transpuesta(subLista(aux, s*s), s):::subLista(aux, (s*s)+1, aux.length)
+  }
   
-  def abajo(l:List[Int], s:Int):List[Int] = transpuesta(derecha(transpuesta(l, s), s), s)
+  def abajo(l:List[Int], s:Int):List[Int] =  {
+  	val aux:List[Int] = derecha(transpuesta(l, s), s)
+  	transpuesta(subLista(aux, s*s), s):::subLista(aux, (s*s)+1, aux.length)
+  }
   
   //Comprobamos si se pueden realizar mas movimientos
   def comprobarMovimientos(tablero: List[Int], s:Int): Boolean={
@@ -196,6 +222,7 @@ object principal {
 		print("| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n");
 		print("'----------------'  '----------------'  '----------------'  '----------------'  '----------------' \n\n");
 		print("                       Created by: Diego-Edgar Gracia & Daniel Lopez                                \n\n");
+		print("                       --------------- AHORA EN SCALA --------------                                \n\n");
   }
   
   def encabezadoIU(s:Int, p:Int, best:Int):Unit ={
@@ -207,6 +234,7 @@ object principal {
   	linea(s)
   	print("VIDAS:\t"); vidas(v)
   	linea(s)
+  	println()
   }
   
   def IU(l:List[Int], s:Int, v:Int, p:Int, b:Int):Unit ={
@@ -215,35 +243,83 @@ object principal {
   	pieIU(s, v)
   }
   
+  def reconocerTeclado():Int={
+    val tecla=scala.io.StdIn.readChar()
+    
+      //Arriba-->1
+      if(tecla=='w' || tecla=='W'){
+        1
+      }
+      //Izquierda-->2
+      else if(tecla=='a'|| tecla=='A'){
+        2
+      }
+      //Abajo-->3
+      else if(tecla=='s' || tecla=='S'){
+        3
+      }
+      //Derecha-->4
+      else if(tecla=='d' || tecla=='D'){
+        4
+      }
+      else{
+        -1
+      }
+  }
+  /*
+  //se llama a si mismo realizando cada ejecución de juego, y devuelve finalmente la puntuación obtenida
+  def partida(t:List[Int], s:Int, v:Int, p:Int, b:Int):Int ={
+    
+  }*/
+  
   def main(args: Array[String]):Unit = {
     var size:Int = 4
     var tablero:List[Int] = rellenaTablero(size)
+    var puntuacion:Int = 0
+    var nvidas:Int = 3
     
-    imprimir(tablero, size)
+    bienvenidaIU()
+    
+    IU(tablero, size, nvidas, puntuacion, 0)
     tablero = introFicha(3, 2, 4, tablero, size)
+    
     tablero = introFicha(2, 3, 2, tablero, size)
     tablero = introFicha(1, 2, 8, tablero, size)
     tablero = introFicha(1, 1, 2, tablero, size)
     tablero = introFicha(2, 1, 2, tablero, size)
   	tablero = introFicha(3, 1, 2, tablero, size)
     tablero = introFicha(4, 1, 2, tablero, size)
-    
+      
+  
   	println("normal")
-    imprimir(tablero, size)
+    IU(tablero, size, nvidas, puntuacion, 0)
     println("derecha")
     tablero = derecha(tablero, size)
-    imprimir(tablero, size)
+    puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
+    tablero = subLista(tablero, size*size)
+    IU(tablero, size, nvidas, puntuacion, 0)
     println("izquierda")
     tablero = izquierda(tablero, size)
-    imprimir(tablero, size)
+    puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
+    tablero = subLista(tablero, size*size)
+    IU(tablero, size, nvidas, puntuacion, 0)
     println("arriba")
     tablero = arriba(tablero, size)
-    imprimir(tablero, size)
+    puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
+    tablero = subLista(tablero, size*size)
+    IU(tablero, size, nvidas, puntuacion, 0)
     println("intro Ficha")
     tablero = introFicha(2, 4, 2, tablero, size)
-    imprimir(tablero, size)
+    IU(tablero, size, nvidas, puntuacion, 0)
     println("abajo")
     tablero = abajo(tablero, size)
-    imprimir(tablero, size)
+    puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
+    tablero = subLista(tablero, size*size)
+    IU(tablero, size, nvidas, puntuacion, 0)
+    println("derecha")
+    tablero = derecha(tablero, size)
+    puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
+    tablero = subLista(tablero, size*size)
+    IU(tablero, size, nvidas, puntuacion, 0)
   }
 }
