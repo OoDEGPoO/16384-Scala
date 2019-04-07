@@ -56,6 +56,18 @@ object principal {
   	else obtener(x+((y-1)*s), l)
   }
   
+  //devuelve la sublista desde el principio de l hasta pos, incluido
+  def subLista(l:List[Int], pos:Int):List[Int] = {
+    if (pos == 0 || l.length == 0) Nil
+    else l.head::subLista(l.tail, pos -1)
+  }
+  
+  //devuelve la sublista de l desde ini hasta fin, incluidos
+  def subLista(l:List[Int], ini:Int, fin:Int):List[Int] = {
+    if (ini == 1 || l.length == 0) subLista(l, fin)
+    else subLista(l.tail, ini-1, fin-1)
+  }
+  
   def invertir(l:List[Int]):List[Int] = {
   	if (l.length == 0) Nil
   	else invertir(l.tail):::l.head::Nil
@@ -70,13 +82,19 @@ object principal {
   
   def transpuesta(l:List[Int], s:Int):List[Int] = transpuesta_aux(l, s)(1, 1)
   
+  //Suma de todos los elementos de una lista 
+  def sumatorio(l:List[Int]):Int = {
+    if (l.length == 0) 0
+    else l.head+sumatorio(l.tail)
+  }
+  
   //Suma con el siguiente valor inmediato siempre y cuando sean equivalentes
-  def suma(l:List[Int], s:Int)(p:Int):List[Int] = {
-  	if (l.length == 0) p::Nil
+  def suma(l:List[Int], s:Int)(p:List[Int]):List[Int] = {
+  	if (l.length == 0) p
   	else
   		if ((l.head == 0) || (l.length % s == 1)) l.head::suma(l.tail, s)(p)
   		else
-  			if (l.head == l.tail.head) l.head*2::suma(0::l.tail.tail, s)(p+(l.head*2))
+  			if (l.head == l.tail.head) l.head*2::suma(0::l.tail.tail, s)(l.head*2::p)
   			else l.head::suma(l.tail, s)(p)
   }
   
@@ -98,32 +116,28 @@ object principal {
   
   //Pasos del movimiento de las fichas a la dch
   def movimiento(l:List[Int], s:Int):List[Int] = {
-  	val t:List[Int] = (
-  		invertir(//4º						- Volvemos a colocar
-  			suma(//3º							- Suma los inmediatos
-  				invertir(//2º				- Para que la suma se primero por el lateral
-  					mueve(l, s))//1º	- Para colocar todo pegado a la dch
-  			, s)(0)))
-  	t.head::mueve(//5º								- Movemos a su posición final
-  		t.tail
-  	, s)
+    val sum:List[Int] = suma(invertir(mueve(l, s)), s)(Nil)
+    val punt:List[Int] = subLista(sum, (s*s)+1, sum.length)
+    
+  	val t:List[Int] = (invertir(subLista(sum, s*s)))
+  	mueve(t, s):::punt
   }
   
   def derecha(l:List[Int], s:Int):List[Int] = movimiento(l, s)
   
   def izquierda(l:List[Int], s:Int):List[Int] = {
   	val aux:List[Int] = movimiento(invertir(l), s)
-  	aux.head::invertir(aux.tail)
+  	invertir(subLista(aux, s*s)):::subLista(aux, (s*s)+1, aux.length)
   }
   
   def arriba(l:List[Int], s:Int):List[Int] = {
   	val aux:List[Int] = izquierda(transpuesta(l, s), s)
-  	aux.head::transpuesta(aux.tail, s)
+  	transpuesta(subLista(aux, s*s), s):::subLista(aux, (s*s)+1, aux.length)
   }
   
   def abajo(l:List[Int], s:Int):List[Int] =  {
   	val aux:List[Int] = derecha(transpuesta(l, s), s)
-  	aux.head::transpuesta(aux.tail, s)
+  	transpuesta(subLista(aux, s*s), s):::subLista(aux, (s*s)+1, aux.length)
   }
   
   def imprimir(l: List[Int], s:Int): Unit = {
@@ -176,9 +190,9 @@ object principal {
   	pieIU(s, v)
   }
   
-  def jugada(t:List[Int], s:Int, v:Int, p:Int, b:Int):Int ={
+  /*def jugada(t:List[Int], s:Int, v:Int, p:Int, b:Int):Int ={
     
-  }
+  }*/
   
   def main(args: Array[String]):Unit = {
     var size:Int = 4
@@ -203,31 +217,31 @@ object principal {
     IU(tablero, size, nvidas, puntuacion, 0)
     println("derecha")
     tablero = derecha(tablero, size)
-    puntuacion = tablero.head+puntuacion
-    tablero = tablero.tail
+    puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
+    tablero = subLista(tablero, size*size)
     IU(tablero, size, nvidas, puntuacion, 0)
     println("izquierda")
     tablero = izquierda(tablero, size)
-    puntuacion = tablero.head+puntuacion
-    tablero = tablero.tail
+    puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
+    tablero = subLista(tablero, size*size)
     IU(tablero, size, nvidas, puntuacion, 0)
     println("arriba")
     tablero = arriba(tablero, size)
-    puntuacion = tablero.head+puntuacion
-    tablero = tablero.tail
+    puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
+    tablero = subLista(tablero, size*size)
     IU(tablero, size, nvidas, puntuacion, 0)
     println("intro Ficha")
     tablero = introFicha(2, 4, 2, tablero, size)
     IU(tablero, size, nvidas, puntuacion, 0)
     println("abajo")
     tablero = abajo(tablero, size)
-    puntuacion = tablero.head+puntuacion
-    tablero = tablero.tail
+    puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
+    tablero = subLista(tablero, size*size)
     IU(tablero, size, nvidas, puntuacion, 0)
     println("derecha")
     tablero = derecha(tablero, size)
-    puntuacion = tablero.head+puntuacion
-    tablero = tablero.tail
+    puntuacion = sumatorio(subLista(tablero, (size*size)+1, tablero.length)) + puntuacion
+    tablero = subLista(tablero, size*size)
     IU(tablero, size, nvidas, puntuacion, 0)
   }
 }
