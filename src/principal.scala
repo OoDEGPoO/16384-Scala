@@ -195,7 +195,32 @@ object principal {
   	pieIU(s, v)
   }
   
-  /*def jugada(t:List[Int], s:Int, v:Int, p:Int, b:Int):Int ={
+  def reconocerTeclado():Int={
+    val tecla=scala.io.StdIn.readChar()
+    
+      //Arriba-->1
+      if(tecla=='w' || tecla=='W'){
+        1
+      }
+      //Izquierda-->2
+      else if(tecla=='a'|| tecla=='A'){
+        2
+      }
+      //Abajo-->3
+      else if(tecla=='s' || tecla=='S'){
+        3
+      }
+      //Derecha-->4
+      else if(tecla=='d' || tecla=='D'){
+        4
+      }
+      else{
+        -1
+      }
+  }
+  /*
+  //se llama a si mismo realizando cada ejecución de juego, y devuelve finalmente la puntuación obtenida
+  def partida(t:List[Int], s:Int, v:Int, p:Int, b:Int):Int ={
     
   }*/
   
