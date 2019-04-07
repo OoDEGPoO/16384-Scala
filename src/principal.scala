@@ -70,6 +70,44 @@ object principal {
   
   def transpuesta(l:List[Int], s:Int):List[Int] = transpuesta_aux(l, s)(1, 1)
   
+  //Introduce la semilla de forma recursiva
+  def introSemilla_aux(tablero:List[Int], cont:Int, semillas:List[Int], s:Int): List[Int]={ 
+    
+    val r = scala.util.Random
+    
+    if (cont==0) tablero
+    else {
+      val fila= r.nextInt(s)+1
+      val columna= r.nextInt(s)+1
+      val ficha= obtener(r.nextInt(semillas.length)+1,semillas)      
+      introSemilla_aux(introFicha(columna,fila,ficha,tablero,s), cont-1,semillas,s)
+    }   
+  }
+  
+  //Metodo para introducir las semillas segun la dificultad
+  def introSemillas(tablero: List[Int], dif:Int, s:Int): List[Int]={
+    val dif1: List[Int]= List(2)
+    val dif2: List[Int]= List(2,4)
+    val dif3_4: List[Int]= List(2,4,8)
+      
+    val r = scala.util.Random
+    
+    dif match{
+      case 1=>{
+        introSemilla_aux(tablero,1,dif1,s)
+      }
+      case 2=>{
+        introSemilla_aux(tablero,3,dif2,s)      
+      }
+      case 3=>{
+        introSemilla_aux(tablero,5,dif3_4,s)  
+      }
+      case 4=>{
+        introSemilla_aux(tablero,6,dif3_4,s)      
+      }
+    }   
+  }
+  
   def suma(l:List[Int], s:Int):List[Int] = {
   	if (l.length == 0) Nil
   	else
@@ -116,6 +154,16 @@ object principal {
   def arriba(l:List[Int], s:Int):List[Int] = transpuesta(izquierda(transpuesta(l, s), s), s)
   
   def abajo(l:List[Int], s:Int):List[Int] = transpuesta(derecha(transpuesta(l, s), s), s)
+  
+  //Comprobamos si se pueden realizar mas movimientos
+  def comprobarMovimientos(tablero: List[Int], s:Int): Boolean={
+    val der =derecha(tablero,s)
+    val izq= izquierda(tablero,s)
+    val ab= abajo(tablero,s)
+    val arr= arriba(tablero,s)
+    
+    equivalentes(tablero)(der) && equivalentes(tablero)(izq) && equivalentes(tablero)(ab) && equivalentes(tablero)(arr) 
+  }
   
   def imprimir(l: List[Int], s:Int): Unit = {
   	if (!(l.length == 0))
