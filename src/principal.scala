@@ -70,13 +70,14 @@ object principal {
   
   def transpuesta(l:List[Int], s:Int):List[Int] = transpuesta_aux(l, s)(1, 1)
   
-  def suma(l:List[Int], s:Int):List[Int] = {
-  	if (l.length == 0) Nil
+  //Suma con el siguiente valor inmediato siempre y cuando sean equivalentes
+  def suma(l:List[Int], s:Int)(p:Int):List[Int] = {
+  	if (l.length == 0) p::Nil
   	else
-  		if ((l.head == 0) || (l.length % s == 1)) l.head::suma(l.tail, s)
+  		if ((l.head == 0) || (l.length % s == 1)) l.head::suma(l.tail, s)(p)
   		else
-  			if (l.head == l.tail.head) l.head*2::suma(0::l.tail.tail, s)
-  			else l.head::suma(l.tail, s)
+  			if (l.head == l.tail.head) l.head*2::suma(0::l.tail.tail, s)(p+(l.head*2))
+  			else l.head::suma(l.tail, s)(p)
   }
   
   def mover(l:List[Int], s:Int):List[Int] = {
@@ -88,34 +89,42 @@ object principal {
   			else l.head::mover(l.tail, s)
   }
   
+  //Mientras se pueda seguir moviendo, mueve
+  def mueve(l:List[Int], s:Int):List[Int] = {
+  	val laux:List[Int] = mover(l, s)
+  	if (equivalentes(l)(laux)) laux
+  	else mueve(laux, s)
+  }
+  
+  //Pasos del movimiento de las fichas a la dch
   def movimiento(l:List[Int], s:Int):List[Int] = {
-  	var l0:List[Int] = l
-  	var l1:List[Int] = l
-  	
-  	do {
-  		l0 = l1;
-  		l1 = mover(l0, s);
-  	} while(!(equivalentes(l0)(l1)));
-  	
-  	l1 = invertir(l1)
-  	l1 = suma(l1, s);
-  	l1 = invertir(l1)
-  	
-  	do {
-  		l0 = l1;
-  		l1 = mover(l0, s);
-  	} while(!(equivalentes(l0)(l1)));
-  	
-  	l1
+  	val t:List[Int] = (
+  		invertir(//4º						- Volvemos a colocar
+  			suma(//3º							- Suma los inmediatos
+  				invertir(//2º				- Para que la suma se primero por el lateral
+  					mueve(l, s))//1º	- Para colocar todo pegado a la dch
+  			, s)(0)))
+  	t.head::mueve(//5º								- Movemos a su posición final
+  		t.tail
+  	, s)
   }
   
   def derecha(l:List[Int], s:Int):List[Int] = movimiento(l, s)
   
-  def izquierda(l:List[Int], s:Int):List[Int] = invertir(movimiento(invertir(l), s))
+  def izquierda(l:List[Int], s:Int):List[Int] = {
+  	val aux:List[Int] = movimiento(invertir(l), s)
+  	aux.head::invertir(aux.tail)
+  }
   
-  def arriba(l:List[Int], s:Int):List[Int] = transpuesta(izquierda(transpuesta(l, s), s), s)
+  def arriba(l:List[Int], s:Int):List[Int] = {
+  	val aux:List[Int] = izquierda(transpuesta(l, s), s)
+  	aux.head::transpuesta(aux.tail, s)
+  }
   
-  def abajo(l:List[Int], s:Int):List[Int] = transpuesta(derecha(transpuesta(l, s), s), s)
+  def abajo(l:List[Int], s:Int):List[Int] =  {
+  	val aux:List[Int] = derecha(transpuesta(l, s), s)
+  	aux.head::transpuesta(aux.tail, s)
+  }
   
   def imprimir(l: List[Int], s:Int): Unit = {
   	if (!(l.length == 0))
@@ -125,35 +134,100 @@ object principal {
   		}
   }
   
+  def linea(s:Int):Unit ={
+  	if (s == 0) print("\n")
+  	else {print("-\t"); linea(s-1)}
+  }
+  
+  def vidas(v:Int):Unit ={
+  	if (v == 0) print("\n")
+  	else {print(" <3 "); vidas(v-1)}
+  }
+  
+  def bienvenidaIU():Unit ={
+		print(".----------------.  .----------------.  .----------------.  .----------------.  .----------------.\n");
+		print("| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n");
+		print("| |     __       | || |    ______    | || |    ______    | || |     ____     | || |   _    _     | |\n");
+		print("| |    /  |      | || |  .' ____ \\   | || |   / ____ `.  | || |   .' __ '.   | || |  | |  | |    | |\n");
+		print("| |    `| |      | || |  | |____\\_|  | || |   `'  __) |  | || |   | (__) |   | || |  | |__| |_   | |\n");
+		print("| |     | |      | || |  | '____`'.  | || |   _ | __ '.  | || |   .`____'.   | || |  |____   _|  | |\n");
+		print("| |    _| |_     | || |  | (____) |  | || |  | \\____) |  | || |  | (____) |  | || |      _| |_   | |\n");
+		print("| |   |_____|    | || |  '.______.'  | || |   \\______.'  | || |  `.______.'  | || |     |_____|  | |\n");
+		print("| |              | || |              | || |              | || |              | || |              | |\n");
+		print("| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n");
+		print("'----------------'  '----------------'  '----------------'  '----------------'  '----------------' \n\n");
+		print("                       Created by: Diego-Edgar Gracia & Daniel Lopez                                \n\n");
+  }
+  
+  def encabezadoIU(s:Int, p:Int, best:Int):Unit ={
+  	println("Punt: " + p + "\tMejor: " + best)
+  	linea(s)
+  }
+  
+  def pieIU(s:Int, v:Int):Unit ={
+  	linea(s)
+  	print("VIDAS:\t"); vidas(v)
+  	linea(s)
+  }
+  
+  def IU(l:List[Int], s:Int, v:Int, p:Int, b:Int):Unit ={
+  	encabezadoIU(s, p, b)
+  	imprimir(l, s)
+  	pieIU(s, v)
+  }
+  
+  def jugada(t:List[Int], s:Int, v:Int, p:Int, b:Int):Int ={
+    
+  }
+  
   def main(args: Array[String]):Unit = {
     var size:Int = 4
     var tablero:List[Int] = rellenaTablero(size)
+    var puntuacion:Int = 0
+    var nvidas:Int = 3
     
-    imprimir(tablero, size)
+    bienvenidaIU()
+    
+    IU(tablero, size, nvidas, puntuacion, 0)
     tablero = introFicha(3, 2, 4, tablero, size)
+    
     tablero = introFicha(2, 3, 2, tablero, size)
     tablero = introFicha(1, 2, 8, tablero, size)
     tablero = introFicha(1, 1, 2, tablero, size)
     tablero = introFicha(2, 1, 2, tablero, size)
   	tablero = introFicha(3, 1, 2, tablero, size)
     tablero = introFicha(4, 1, 2, tablero, size)
-    
+      
+  
   	println("normal")
-    imprimir(tablero, size)
+    IU(tablero, size, nvidas, puntuacion, 0)
     println("derecha")
     tablero = derecha(tablero, size)
-    imprimir(tablero, size)
+    puntuacion = tablero.head+puntuacion
+    tablero = tablero.tail
+    IU(tablero, size, nvidas, puntuacion, 0)
     println("izquierda")
     tablero = izquierda(tablero, size)
-    imprimir(tablero, size)
+    puntuacion = tablero.head+puntuacion
+    tablero = tablero.tail
+    IU(tablero, size, nvidas, puntuacion, 0)
     println("arriba")
     tablero = arriba(tablero, size)
-    imprimir(tablero, size)
+    puntuacion = tablero.head+puntuacion
+    tablero = tablero.tail
+    IU(tablero, size, nvidas, puntuacion, 0)
     println("intro Ficha")
     tablero = introFicha(2, 4, 2, tablero, size)
-    imprimir(tablero, size)
+    IU(tablero, size, nvidas, puntuacion, 0)
     println("abajo")
     tablero = abajo(tablero, size)
-    imprimir(tablero, size)
+    puntuacion = tablero.head+puntuacion
+    tablero = tablero.tail
+    IU(tablero, size, nvidas, puntuacion, 0)
+    println("derecha")
+    tablero = derecha(tablero, size)
+    puntuacion = tablero.head+puntuacion
+    tablero = tablero.tail
+    IU(tablero, size, nvidas, puntuacion, 0)
   }
 }

@@ -69,21 +69,7 @@ object Pruebas16384 {;import org.scalaide.worksheet.runtime.library.WorksheetSup
   		else getFicha(l, s)(y, x)::transpuesta_aux(l, s)(x+1, y)
   };System.out.println("""transpuesta_aux: (l: List[Int], s: Int)(x: Int, y: Int)List[Int]""");$skip(81); 
   
-  def transpuesta(l:List[Int], s:Int):List[Int] = transpuesta_aux(l, s)(1, 1);System.out.println("""transpuesta: (l: List[Int], s: Int)List[Int]""");$skip(48); 
-  
-  var lista:List[Int] = rellenaTablero(size);System.out.println("""lista  : List[Int] = """ + $show(lista ));$skip(226); 
-  
-  def imprimir(l: List[Int], s:Int): Unit = {
-  	if (!(l.length == 0))
-  		(l.length % s) match {
-  			case 1 => {println(l.head); imprimir(l.tail, s);}
-  			case _ => {print(l.head + "\t"); imprimir(l.tail, s);}
-  		}
-  };System.out.println("""imprimir: (l: List[Int], s: Int)Unit""");$skip(27); 
-  
-  imprimir(lista, size);$skip(46); 
-  
-  lista = introFicha(3, 2, 4, lista, size);$skip(697); 
+  def transpuesta(l:List[Int], s:Int):List[Int] = transpuesta_aux(l, s)(1, 1);System.out.println("""transpuesta: (l: List[Int], s: Int)List[Int]""");$skip(727); 
 
 /* Basurilla
 	//Cuantas posiciones a la derecha de X está el siguiente equivalente
@@ -97,15 +83,16 @@ object Pruebas16384 {;import org.scalaide.worksheet.runtime.library.WorksheetSup
 	}*/
   
   //Suma con el siguiente valor inmediato siempre y cuando sean equivalentes
-  def suma(l:List[Int], s:Int):List[Int] = {
-  	if (l.length == 0) Nil
+  def suma(l:List[Int], s:Int)(p:Int):List[Int] = {
+  	if (l.length == 0) p::Nil
   	else
-  		if ((l.head == 0) || (l.length % s == 1)) l.head::suma(l.tail, s)
+  		if ((l.head == 0) || (l.length % s == 1)) l.head::suma(l.tail, s)(p)
   		else
-  			if (l.head == l.tail.head) l.head*2::suma(0::l.tail.tail, s)
-  			else l.head::suma(l.tail, s)
-  };System.out.println("""suma: (l: List[Int], s: Int)List[Int]""");$skip(264); 
+  			if (l.head == l.tail.head) l.head*2::suma(0::l.tail.tail, s)(p+(l.head*2))
+  			else l.head::suma(l.tail, s)(p)
+  };System.out.println("""suma: (l: List[Int], s: Int)(p: Int)List[Int]""");$skip(269); 
   
+  //
   def mover(l:List[Int], s:Int):List[Int] = {
   	if (l.length == 0) Nil
   	else
@@ -113,36 +100,103 @@ object Pruebas16384 {;import org.scalaide.worksheet.runtime.library.WorksheetSup
   		else
   			if (l.tail.head == 0) 0::mover(l.head::l.tail.tail, s)
   			else l.head::mover(l.tail, s)
-  };System.out.println("""mover: (l: List[Int], s: Int)List[Int]""");$skip(353); 
+  };System.out.println("""mover: (l: List[Int], s: Int)List[Int]""");$skip(192); 
   
+  //Mientras se pueda seguir moviendo, mueve
+  def mueve(l:List[Int], s:Int):List[Int] = {
+  	val laux:List[Int] = mover(l, s)
+  	if (equivalentes(l)(laux)) laux
+  	else mueve(laux, s)
+  };System.out.println("""mueve: (l: List[Int], s: Int)List[Int]""");$skip(437); 
+  
+  //Pasos del movimiento de las fichas a la dch
   def movimiento(l:List[Int], s:Int):List[Int] = {
-  	var l0:List[Int] = l
-  	var l1:List[Int] = l
-  	
-  	do {
-  		l0 = l1;
-  		l1 = mover(l0, s);
-  	} while(!(equivalentes(l0)(l1)));
-  	
-  	l1 = invertir(l1)
-  	l1 = suma(l1, s);
-  	l1 = invertir(l1)
-  	
-  	do {
-  		l0 = l1;
-  		l1 = mover(l0, s);
-  	} while(!(equivalentes(l0)(l1)));
-  	
-  	l1
+  	val t:List[Int] = (
+  		invertir(//4º						- Volvemos a colocar
+  			suma(//3º							- Suma los inmediatos
+  				invertir(//2º				- Para que la suma se primero por el lateral
+  					mueve(l, s))//1º	- Para colocar todo pegado a la dch
+  			, s)(0)))
+  	t.head::mueve(//5º								- Movemos a su posición final
+  		t.tail
+  	, s)
   };System.out.println("""movimiento: (l: List[Int], s: Int)List[Int]""");$skip(66); 
   
-  def derecha(l:List[Int], s:Int):List[Int] = movimiento(l, s);System.out.println("""derecha: (l: List[Int], s: Int)List[Int]""");$skip(88); 
+  def derecha(l:List[Int], s:Int):List[Int] = movimiento(l, s);System.out.println("""derecha: (l: List[Int], s: Int)List[Int]""");$skip(139); 
   
-  def izquierda(l:List[Int], s:Int):List[Int] = invertir(movimiento(invertir(l), s));System.out.println("""izquierda: (l: List[Int], s: Int)List[Int]""");$skip(96); 
+  def izquierda(l:List[Int], s:Int):List[Int] = {
+  	val aux:List[Int] = movimiento(invertir(l), s)
+  	aux.head::invertir(aux.tail)
+  };System.out.println("""izquierda: (l: List[Int], s: Int)List[Int]""");$skip(147); 
   
-  def arriba(l:List[Int], s:Int):List[Int] = transpuesta(izquierda(transpuesta(l, s), s), s);System.out.println("""arriba: (l: List[Int], s: Int)List[Int]""");$skip(93); 
+  def arriba(l:List[Int], s:Int):List[Int] = {
+  	val aux:List[Int] = izquierda(transpuesta(l, s), s)
+  	aux.head::transpuesta(aux.tail, s)
+  };System.out.println("""arriba: (l: List[Int], s: Int)List[Int]""");$skip(145); 
   
-  def abajo(l:List[Int], s:Int):List[Int] = transpuesta(derecha(transpuesta(l, s), s), s);System.out.println("""abajo: (l: List[Int], s: Int)List[Int]""");$skip(46); 
+  def abajo(l:List[Int], s:Int):List[Int] =  {
+  	val aux:List[Int] = derecha(transpuesta(l, s), s)
+  	aux.head::transpuesta(aux.tail, s)
+  };System.out.println("""abajo: (l: List[Int], s: Int)List[Int]""");$skip(226); 
+  
+  def imprimir(l: List[Int], s:Int): Unit = {
+  	if (!(l.length == 0))
+  		(l.length % s) match {
+  			case 1 => {println(l.head); imprimir(l.tail, s);}
+  			case _ => {print(l.head + "\t"); imprimir(l.tail, s);}
+  		}
+  };System.out.println("""imprimir: (l: List[Int], s: Int)Unit""");$skip(96); 
+  
+  def linea(s:Int):Unit ={
+  	if (s == 0) print("\n")
+  	else {print("-\t"); linea(s-1)}
+  };System.out.println("""linea: (s: Int)Unit""");$skip(97); 
+  
+  def vidas(v:Int):Unit ={
+  	if (v == 0) print("\n")
+  	else {print(" <3 "); vidas(v-1)}
+  };System.out.println("""vidas: (v: Int)Unit""");$skip(1421); 
+  
+  def bienvenidaIU():Unit ={
+		print(".----------------.  .----------------.  .----------------.  .----------------.  .----------------.\n");
+		print("| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n");
+		print("| |     __       | || |    ______    | || |    ______    | || |     ____     | || |   _    _     | |\n");
+		print("| |    /  |      | || |  .' ____ \\   | || |   / ____ `.  | || |   .' __ '.   | || |  | |  | |    | |\n");
+		print("| |    `| |      | || |  | |____\\_|  | || |   `'  __) |  | || |   | (__) |   | || |  | |__| |_   | |\n");
+		print("| |     | |      | || |  | '____`'.  | || |   _ | __ '.  | || |   .`____'.   | || |  |____   _|  | |\n");
+		print("| |    _| |_     | || |  | (____) |  | || |  | \\____) |  | || |  | (____) |  | || |      _| |_   | |\n");
+		print("| |   |_____|    | || |  '.______.'  | || |   \\______.'  | || |  `.______.'  | || |     |_____|  | |\n");
+		print("| |              | || |              | || |              | || |              | || |              | |\n");
+		print("| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n");
+		print("'----------------'  '----------------'  '----------------'  '----------------'  '----------------' \n\n");
+		print("                       Created by: Diego-Edgar Gracia & Daniel Lopez                                \n\n");
+  };System.out.println("""bienvenidaIU: ()Unit""");$skip(116); 
+  
+  def encabezadoIU(s:Int, p:Int, best:Int):Unit ={
+  	println("Punt: " + p + "\tMejor: " + best)
+  	linea(s)
+  };System.out.println("""encabezadoIU: (s: Int, p: Int, best: Int)Unit""");$skip(96); 
+  
+  def pieIU(s:Int, v:Int):Unit ={
+  	linea(s)
+  	print("VIDAS:\t"); vidas(v)
+  	linea(s)
+  };System.out.println("""pieIU: (s: Int, v: Int)Unit""");$skip(123); 
+  
+  def IU(l:List[Int], s:Int, v:Int, p:Int, b:Int):Unit ={
+  	encabezadoIU(s, p, b)
+  	imprimir(l, s)
+  	pieIU(s, v)
+  };System.out.println("""IU: (l: List[Int], s: Int, v: Int, p: Int, b: Int)Unit""");$skip(48); 
+  
+  var lista:List[Int] = rellenaTablero(size);System.out.println("""lista  : List[Int] = """ + $show(lista ));$skip(25); 
+  var puntuacion:Int = 0;System.out.println("""puntuacion  : Int = """ + $show(puntuacion ));$skip(21); 
+  var nvidas:Int = 3;System.out.println("""nvidas  : Int = """ + $show(nvidas ));$skip(20); 
+  
+  bienvenidaIU();$skip(44); 
+  
+  IU(lista, size, nvidas, puntuacion, 0);$skip(43); 
+  lista = introFicha(3, 2, 4, lista, size);$skip(46); 
   
   lista = introFicha(2, 3, 2, lista, size);$skip(43); 
   lista = introFicha(1, 2, 8, lista, size);$skip(43); 
@@ -152,21 +206,34 @@ object Pruebas16384 {;import org.scalaide.worksheet.runtime.library.WorksheetSup
   lista = introFicha(4, 1, 2, lista, size);$skip(25); 
     
 
-	println("normal");$skip(24); 
-  imprimir(lista, size);$skip(21); 
+	println("normal");$skip(41); 
+  IU(lista, size, nvidas, puntuacion, 0);$skip(21); 
   println("derecha");$skip(31); 
-  lista = derecha(lista, size);$skip(24); 
-  imprimir(lista, size);$skip(23); 
+  lista = derecha(lista, size);$skip(37); 
+  puntuacion = lista.head+puntuacion;$skip(21); 
+  lista = lista.tail;$skip(41); 
+  IU(lista, size, nvidas, puntuacion, 0);$skip(23); 
   println("izquierda");$skip(33); 
-  lista = izquierda(lista, size);$skip(24); 
-  imprimir(lista, size);$skip(20); 
+  lista = izquierda(lista, size);$skip(37); 
+  puntuacion = lista.head+puntuacion;$skip(21); 
+  lista = lista.tail;$skip(41); 
+  IU(lista, size, nvidas, puntuacion, 0);$skip(20); 
   println("arriba");$skip(30); 
-  lista = arriba(lista, size);$skip(24); 
-  imprimir(lista, size);$skip(25); 
+  lista = arriba(lista, size);$skip(37); 
+  puntuacion = lista.head+puntuacion;$skip(21); 
+  lista = lista.tail;$skip(41); 
+  IU(lista, size, nvidas, puntuacion, 0);$skip(25); 
   println("intro Ficha");$skip(43); 
-  lista = introFicha(2, 4, 2, lista, size);$skip(24); 
-  imprimir(lista, size);$skip(19); 
+  lista = introFicha(2, 4, 2, lista, size);$skip(41); 
+  IU(lista, size, nvidas, puntuacion, 0);$skip(19); 
   println("abajo");$skip(29); 
-  lista = abajo(lista, size);$skip(24); 
-  imprimir(lista, size)}
+  lista = abajo(lista, size);$skip(37); 
+  puntuacion = lista.head+puntuacion;$skip(21); 
+  lista = lista.tail;$skip(41); 
+  IU(lista, size, nvidas, puntuacion, 0);$skip(21); 
+  println("derecha");$skip(31); 
+  lista = derecha(lista, size);$skip(37); 
+  puntuacion = lista.head+puntuacion;$skip(21); 
+  lista = lista.tail;$skip(41); 
+  IU(lista, size, nvidas, puntuacion, 0)}
 }
