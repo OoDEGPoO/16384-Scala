@@ -11,6 +11,7 @@ object principal {
   	rellenaLista(s * s)(0)
   }
   
+  //Si son la misma lista
   def equivalentes(m:List[Int])(n:List[Int]):Boolean ={
   	if (m.length != n.length) false
   	else
@@ -68,6 +69,7 @@ object principal {
     else subLista(l.tail, ini-1, fin-1)
   }
   
+  //lista invertida en orden
   def invertir(l:List[Int]):List[Int] = {
   	if (l.length == 0) Nil
   	else invertir(l.tail):::l.head::Nil
@@ -80,6 +82,7 @@ object principal {
   		else getFicha(l, s)(y, x)::transpuesta_aux(l, s)(x+1, y)
   }
   
+  //Transpuesta de la matriz cuadrada l (se introduce linealizada)
   def transpuesta(l:List[Int], s:Int):List[Int] = transpuesta_aux(l, s)(1, 1)
   
   //Suma de todos los elementos de una lista 
@@ -171,6 +174,7 @@ object principal {
 		print("| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n");
 		print("'----------------'  '----------------'  '----------------'  '----------------'  '----------------' \n\n");
 		print("                       Created by: Diego-Edgar Gracia & Daniel Lopez                                \n\n");
+		print("                       --------------- AHORA EN SCALA --------------                                \n\n");
   }
   
   def encabezadoIU(s:Int, p:Int, best:Int):Unit ={
@@ -182,6 +186,7 @@ object principal {
   	linea(s)
   	print("VIDAS:\t"); vidas(v)
   	linea(s)
+  	println()
   }
   
   def IU(l:List[Int], s:Int, v:Int, p:Int, b:Int):Unit ={
