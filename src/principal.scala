@@ -1,4 +1,10 @@
-
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.Color
+import javax.swing.JFrame
+import javax.swing.JScrollPane
+import javax.swing.JTextArea
+import javax.swing.JTable
 
 object principal {
   
@@ -32,7 +38,7 @@ object principal {
   		if (pos == 1)
   			n::l.tail
   		else
-  			l.head::poner(pos-1, n, l.tail)
+  			l.head::setLista(pos-1, n, l.tail)
   }
   
   //Como setLista pero comprobando que se pueda introducir
@@ -201,6 +207,31 @@ object principal {
     equivalentes(tablero)(subLista(arriba(tablero,s), s*s))  //Arriba
   }
   
+  def listaIntAString(l:List[Int]): List[String] = {
+    if (l.length == 0) Nil
+    else l.head.toString()::listaIntAString(l.tail)
+  }
+  
+  def getArrayFromList(l:List[Object]): Array[Object] = {
+    if (l.length == 0) Array()
+    else Array(l.head) ++ getArrayFromList(l.tail)
+  }
+  
+  def ListIntToArrayObject(l:List[Int]): Array[Object] = {
+    if (l.length == 0) Array()
+    else Array(l.head.toString()) ++ ListIntToArrayObject(l.tail)
+  }
+  
+  def ListADobleArray(l:List[Int], s:Int): Array[Array[Object]] = {
+    if (l.length == 0) Array()
+    else Array( ListIntToArrayObject(subLista(l, s)) ) ++ ListADobleArray(subLista(l, s+1, l.length), s)
+  }
+  
+  def tituloVacioColumnas(s:Int): Array[Object] = {
+    if (s == 0) Array()
+    else Array("") ++ tituloVacioColumnas(s-1)
+  }
+  
   def imprimir(l: List[Int], s:Int): Unit = {
   	if (!(l.length == 0))
   		(l.length % s) match {
@@ -209,14 +240,31 @@ object principal {
   		}
   }
   
-  def linea(s:Int):Unit ={
-  	if (s == 0) print("\n")
-  	else {print("-\t"); linea(s-1)}
+  def actualizaTablaAux(tabla:JTable, l:List[Int], s:Int)(x:Int, y:Int):Unit ={
+    if (l.length != 0) {
+      if (x == s) {
+        tabla.setValueAt(l.head.toString(), x-1, y-1)
+        actualizaTablaAux(tabla, l.tail, s)(1, y+1)
+      }
+      else {
+        tabla.setValueAt(l.head.toString(), x-1, y-1)
+        actualizaTablaAux(tabla, l.tail, s)(x+1, y)
+      }
+    }
   }
   
-  def vidas(v:Int):Unit ={
-  	if (v == 0) print("\n")
-  	else {print(" <3 "); vidas(v-1)}
+  def actualizaTabla(tabla:JTable, l:List[Int], s:Int):Unit ={
+    actualizaTablaAux(tabla, l, s)(1, 1)
+  }
+  
+  def linea(s:Int):String ={
+  	if (s == 0) "\n"
+  	else {"-\t" + linea(s-1)}
+  }
+  
+  def vidas(v:Int):String ={
+  	if (v == 0) "\n"
+  	else {" <3 " + vidas(v-1)}
   }
   
   def bienvenidaIU():Unit ={
@@ -235,22 +283,25 @@ object principal {
 		print("                       --------------- AHORA EN SCALA --------------                                \n\n");
   }
   
-  def encabezadoIU(s:Int, p:Int, best:Int):Unit ={
-  	println("Punt: " + p + "\tMejor: " + best + "\t(WASD para mover el tablero\tO para Salir)")
-  	linea(s)
+  def encabezadoIU(s:Int, p:Int, best:Int):String ={
+  	"Punt: " + p.toString + "\tMejor: " + best.toString + "\t(WASD para mover el tablero\tO para Salir)\n"
   }
   
-  def pieIU(s:Int, v:Int):Unit ={
-  	linea(s)
-  	print("VIDAS:\t"); vidas(v)
-  	linea(s)
-  	println()
+  def pieIU(v:Int):String ={
+  	"VIDAS:\t" + vidas(v)
   }
   
-  def IU(l:List[Int], s:Int, v:Int, p:Int, b:Int):Unit ={
-  	encabezadoIU(s, p, b)
+  def iuGrafica(l:List[Int], s:Int, v:Int, p:Int, b:Int, cabecera:JTextArea, tabla:JTable, pie:JTextArea):Unit = {
+    cabecera.setText(encabezadoIU(s, p, b))
+    actualizaTabla(tabla, l, s)
+    pie.setText(pieIU(v))
+  }
+  
+  def IU(l:List[Int], s:Int, v:Int, p:Int, b:Int, cabecera:JTextArea, tabla:JTable, pie:JTextArea):Unit ={
+  	print(encabezadoIU(s, p, b) + linea(s))
   	imprimir(l, s)
-  	pieIU(s, v)
+  	print(linea(s)+pieIU(v)+linea(s))
+  	iuGrafica(l, s, v, p, b, cabecera, tabla, pie)
   }
   
   def reconocerTeclado():Int={
@@ -315,7 +366,7 @@ object principal {
   
   //se llama a si mismo realizando cada ejecución de juego, y devuelve finalmente la puntuación obtenida
   //t-tablero  /  s-size  /  v-vidas  /  p-puntos  /  b-mejores puntos  /  d-dificultad
-  def partida(t:List[Int], s:Int, v:Int, p:Int, b:Int, d:Int):Int ={
+  def partida(t:List[Int], s:Int, v:Int, p:Int, b:Int, d:Int, cabecera:JTextArea, tabla:JTable, pie:JTextArea):Int ={
     reconocerTeclado() match {
       case 1 => {
         val l1:List[Int] = arriba(t, s)
@@ -323,9 +374,9 @@ object principal {
         val l2:List[Int] = introSemillas(subLista(l1, s*s), d, s)
         val best:Int = mayor(puntos)(b)
         
-        IU(l2, s, v, puntos, best)
+        IU(l2, s, v, puntos, best, cabecera, tabla, pie)
         if (comprobarMovimientos(l2, s)) puntos
-        else partida(l2, s, v, puntos, best, d)
+        else partida(l2, s, v, puntos, best, d, cabecera, tabla, pie)
         }
       case 2 => {
         val l1:List[Int] = izquierda(t, s)
@@ -333,9 +384,9 @@ object principal {
         val l2:List[Int] = introSemillas(subLista(l1, s*s), d, s)
         val best:Int = mayor(puntos)(b)
         
-        IU(l2, s, v, puntos, best)
+        IU(l2, s, v, puntos, best, cabecera, tabla, pie)
         if (comprobarMovimientos(l2, s)) puntos
-        else partida(l2, s, v, puntos, best, d)
+        else partida(l2, s, v, puntos, best, d, cabecera, tabla, pie)
         }
       case 3 => {
         val l1:List[Int] = abajo(t, s)
@@ -343,9 +394,9 @@ object principal {
         val l2:List[Int] = introSemillas(subLista(l1, s*s), d, s)
         val best:Int = mayor(puntos)(b)
         
-        IU(l2, s, v, puntos, best)
+        IU(l2, s, v, puntos, best, cabecera, tabla, pie)
         if (comprobarMovimientos(l2, s)) puntos
-        else partida(l2, s, v, puntos, best, d)
+        else partida(l2, s, v, puntos, best, d, cabecera, tabla, pie)
         }
       case 4 => {
         val l1:List[Int] = derecha(t, s)
@@ -353,16 +404,16 @@ object principal {
         val l2:List[Int] = introSemillas(subLista(l1, s*s), d, s)
         val best:Int = mayor(puntos)(b)
         
-        IU(l2, s, v, puntos, best)
+        IU(l2, s, v, puntos, best, cabecera, tabla, pie)
         if (comprobarMovimientos(l2, s)) puntos
-        else partida(l2, s, v, puntos, best, d)
+        else partida(l2, s, v, puntos, best, d, cabecera, tabla, pie)
         }
       case 5 => -p
-      case _ => partida(t, s, v, p, b, d)
+      case _ => partida(t, s, v, p, b, d, cabecera, tabla, pie)
     }
   }
   
-  def partidaAuto(t:List[Int], s:Int, v:Int, p:Int, b:Int, d:Int):Int ={
+  def partidaAuto(t:List[Int], s:Int, v:Int, p:Int, b:Int, d:Int, cabecera:JTextArea, tabla:JTable, pie:JTextArea):Int ={
         Thread.sleep(1000)
         val larriba:List[Int] = arriba(t, s)
         val puntosArriba:Int = p + sumatorio(subLista(larriba, (s*s)+1, larriba.length))
@@ -386,36 +437,36 @@ object principal {
             val puntosFinal= puntosArriba
             val best:Int = mayor(puntosFinal)(b)
             
-            IU(tableroFinal, s, v,puntosFinal, b)
+            IU(tableroFinal, s, v,puntosFinal, b, cabecera, tabla, pie)
             if (comprobarMovimientos(tableroFinal, s)) puntosFinal
-            else partidaAuto(tableroFinal, s, v, puntosFinal, best, d)
+            else partidaAuto(tableroFinal, s, v, puntosFinal, best, d, cabecera, tabla, pie)
           }
           case "abajo"=>{
             val tableroFinal= introSemillas(subLista(labajo, s*s), d, s)
             val puntosFinal= puntosAbajo
             val best:Int = mayor(puntosFinal)(b)
             
-            IU(tableroFinal, s, v,puntosFinal, b)
+            IU(tableroFinal, s, v,puntosFinal, b, cabecera, tabla, pie)
             if (comprobarMovimientos(tableroFinal, s)) puntosFinal
-            else partidaAuto(tableroFinal, s, v, puntosFinal, best, d)
+            else partidaAuto(tableroFinal, s, v, puntosFinal, best, d, cabecera, tabla, pie)
           }
           case "izquierda"=>{
             val tableroFinal= introSemillas(subLista(lizquierda, s*s), d, s)
             val puntosFinal= puntosIzquierda
             val best:Int = mayor(puntosFinal)(b)
             
-            IU(tableroFinal, s, v,puntosFinal, b)
+            IU(tableroFinal, s, v,puntosFinal, b, cabecera, tabla, pie)
             if (comprobarMovimientos(tableroFinal, s)) puntosFinal
-            else partidaAuto(tableroFinal, s, v, puntosFinal, best, d)
+            else partidaAuto(tableroFinal, s, v, puntosFinal, best, d, cabecera, tabla, pie)
           }
           case "derecha"=>{
             val tableroFinal= introSemillas(subLista(lderecha, s*s), d, s)
             val puntosFinal= puntosDerecha
             val best:Int = mayor(puntosFinal)(b)
             
-            IU(tableroFinal, s, v,puntosFinal, b)
+            IU(tableroFinal, s, v,puntosFinal, b, cabecera, tabla, pie)
             if (comprobarMovimientos(tableroFinal, s)) puntosFinal
-            else partidaAuto(tableroFinal, s, v, puntosFinal, best, d)
+            else partidaAuto(tableroFinal, s, v, puntosFinal, best, d, cabecera, tabla, pie)
           }
         }       
   }
@@ -434,35 +485,35 @@ object principal {
     }
   }
   
-  def coin(vidas:Int, best:Int, dif:Int):Int = {
+  def coin(vidas:Int, best:Int, dif:Int, cabecera:JTextArea, tabla:JTable, pie:JTextArea):Int = {
     if (vidas > 0) {
       dif match {
         case 1 => {
           val t:List[Int] = iniciaTablero(1)
-          IU(t, 4, 2, 0, best)
-          val b:Int = mayor(partida(t , 4, vidas, 0, best, 1))(best)
-          if (b >= 0) coin (vidas-1, b, dif)
+          IU(t, 4, 2, 0, best, cabecera, tabla, pie)
+          val b:Int = mayor(partida(t , 4, vidas, 0, best, 1, cabecera, tabla, pie))(best)
+          if (b >= 0) coin (vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 2 => {
           val t:List[Int] = iniciaTablero(2)
-          IU(t, 9, 2, 0, best)
-          val b:Int = mayor(partida(t , 9, vidas, 0, best, 2))(best)
-          if (b >= 0) coin (vidas-1, b, dif)
+          IU(t, 9, 2, 0, best, cabecera, tabla, pie)
+          val b:Int = mayor(partida(t , 9, vidas, 0, best, 2, cabecera, tabla, pie))(best)
+          if (b >= 0) coin (vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 3 => {
           val t:List[Int] = iniciaTablero(3)
-          IU(t, 14, 2, 0, best)
-          val b:Int = mayor(partida(t , 14, vidas, 0, best, 3))(best)
-          if (b >= 0) coin (vidas-1, b, dif)
+          IU(t, 14, 2, 0, best, cabecera, tabla, pie)
+          val b:Int = mayor(partida(t , 14, vidas, 0, best, 3, cabecera, tabla, pie))(best)
+          if (b >= 0) coin (vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 4 => {
           val t:List[Int] = iniciaTablero(4)
-          IU(t, 17, 2, 0, best)
-          val b:Int = mayor(partida(t , 17, vidas, 0, best, 4))(best)
-          if (b >= 0) coin (vidas-1, b, dif)
+          IU(t, 17, 2, 0, best, cabecera, tabla, pie)
+          val b:Int = mayor(partida(t , 17, vidas, 0, best, 4, cabecera, tabla, pie))(best)
+          if (b >= 0) coin (vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
       }
@@ -470,35 +521,35 @@ object principal {
     else best
   }
   
-  def modoAutomatico(vidas:Int, best:Int, dif:Int):Int= {
+  def modoAutomatico(vidas:Int, best:Int, dif:Int, cabecera:JTextArea, tabla:JTable, pie:JTextArea):Int= {
      if (vidas > 0) {
       dif match {
         case 1 => {
           val t:List[Int] = iniciaTablero(1)
-          IU(t, 4, 2, 0, best)
-          val b:Int = mayor(partidaAuto(t , 4, vidas, 0, best, 1))(best)
-          if (b >= 0) modoAutomatico(vidas-1, b, dif)
+          IU(t, 4, 2, 0, best, cabecera, tabla, pie)
+          val b:Int = mayor(partidaAuto(t , 4, vidas, 0, best, 1, cabecera, tabla, pie))(best)
+          if (b >= 0) modoAutomatico(vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 2 => {
           val t:List[Int] = iniciaTablero(2)
-          IU(t, 9, 2, 0, best)
-          val b:Int = mayor(partidaAuto(t , 9, vidas, 0, best, 2))(best)
-          if (b >= 0) modoAutomatico(vidas-1, b, dif)
+          IU(t, 9, 2, 0, best, cabecera, tabla, pie)
+          val b:Int = mayor(partidaAuto(t , 9, vidas, 0, best, 2, cabecera, tabla, pie))(best)
+          if (b >= 0) modoAutomatico(vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 3 => {
           val t:List[Int] = iniciaTablero(3)
-          IU(t, 14, 2, 0, best)
-          val b:Int = mayor(partidaAuto(t , 14, vidas, 0, best, 3))(best)
-          if (b >= 0) modoAutomatico(vidas-1, b, dif)
+          IU(t, 14, 2, 0, best, cabecera, tabla, pie)
+          val b:Int = mayor(partidaAuto(t , 14, vidas, 0, best, 3, cabecera, tabla, pie))(best)
+          if (b >= 0) modoAutomatico(vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 4 => {
           val t:List[Int] = iniciaTablero(4)
-          IU(t, 17, 2, 0, best)
-          val b:Int = mayor(partidaAuto(t , 17, vidas, 0, best, 4))(best)
-          if (b >= 0) modoAutomatico(vidas-1, b, dif)
+          IU(t, 17, 2, 0, best, cabecera, tabla, pie)
+          val b:Int = mayor(partidaAuto(t , 17, vidas, 0, best, 4, cabecera, tabla, pie))(best)
+          if (b >= 0) modoAutomatico(vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
       }
@@ -507,13 +558,19 @@ object principal {
   }
   
   def main(args: Array[String]):Unit = {
+      
+    val ventana = new JFrame("16384 en Scala")
+    val cabecera = new JTextArea()
+    val pie = new JTextArea()
+    val tabla = new JTable(, )
+    
     bienvenidaIU
     
     modo match{      
       //Modo Manual
       case 1 => {
         val dif= dificultad()
-        val b:Int= coin(3,0,dif)
+        val b:Int= coin(3,0,dif, cabecera, tabla, pie)
         print("                       ---------         GAME OVER        ----------                                \n\n");
         println("Mejor Puntuacion: " + b)
       }
@@ -521,7 +578,7 @@ object principal {
       //Modo Automatico
       case 2 =>{
         val dif= dificultad()
-        val b:Int= modoAutomatico(3,0,dif)
+        val b:Int= modoAutomatico(3,0,dif, cabecera, tabla, pie)
         print("                       ---------         GAME OVER        ----------                                \n\n");
         println("Mejor Puntuacion: " + b)
       }   
