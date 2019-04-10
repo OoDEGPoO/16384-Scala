@@ -293,7 +293,7 @@ object principal {
   
   def iuGrafica(l:List[Int], s:Int, v:Int, p:Int, b:Int, cabecera:JTextArea, tabla:JTable, pie:JTextArea):Unit = {
     cabecera.setText(encabezadoIU(s, p, b))
-    actualizaTabla(tabla, l, s)
+    actualizaTabla(tabla, transpuesta(l, s), s)
     pie.setText(pieIU(v))
   }
   
@@ -362,6 +362,20 @@ object principal {
     case 2 => introSemilla_aux(rellenaTablero(9), 4, List(2, 4), 9)
     case 3 => introSemilla_aux(rellenaTablero(14), 6, List(2, 4, 8), 14)
     case 4 => introSemilla_aux(rellenaTablero(17), 6, List(2, 4, 8), 17)
+  }
+  
+  def iniTableroIU(dif:Int):Array[Array[Object]] = dif match {
+    case 1 => ListADobleArray(rellenaTablero(4), 4)
+    case 2 => ListADobleArray(rellenaTablero(9), 9)
+    case 3 => ListADobleArray(rellenaTablero(14), 14)
+    case 4 => ListADobleArray(rellenaTablero(17), 17)
+  }
+  
+  def iniColumnasIU(dif:Int):Array[Object] = dif match {
+    case 1 => tituloVacioColumnas(4)
+    case 2 => tituloVacioColumnas(9)
+    case 3 => tituloVacioColumnas(14)
+    case 4 => tituloVacioColumnas(17)
   }
   
   //se llama a si mismo realizando cada ejecución de juego, y devuelve finalmente la puntuación obtenida
@@ -558,11 +572,7 @@ object principal {
   }
   
   def main(args: Array[String]):Unit = {
-      
-    val ventana = new JFrame("16384 en Scala")
-    val cabecera = new JTextArea()
-    val pie = new JTextArea()
-    val tabla = new JTable(, )
+    
     
     bienvenidaIU
     
@@ -570,6 +580,22 @@ object principal {
       //Modo Manual
       case 1 => {
         val dif= dificultad()
+        val ventana = new JFrame("16384 en Scala")
+        val cabecera = new JTextArea()
+        cabecera.setText("")
+        val pie = new JTextArea()
+        pie.setText("")
+        val tabla = new JTable(iniTableroIU(dif), iniColumnasIU(dif))
+        
+        new JScrollPane()
+        ventana.getContentPane.add(new JScrollPane(cabecera), BorderLayout.NORTH)
+        ventana.getContentPane.add(new JScrollPane(pie), BorderLayout.SOUTH)
+        ventana.getContentPane.add(new JScrollPane(tabla), BorderLayout.CENTER)
+        ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+        ventana.setSize(new Dimension(600, 400))
+        ventana.setLocationRelativeTo(null)
+        ventana.setVisible(true)
+    
         val b:Int= coin(3,0,dif, cabecera, tabla, pie)
         print("                       ---------         GAME OVER        ----------                                \n\n");
         println("Mejor Puntuacion: " + b)
@@ -578,6 +604,22 @@ object principal {
       //Modo Automatico
       case 2 =>{
         val dif= dificultad()
+        val ventana = new JFrame("16384 en Scala")
+        val cabecera = new JTextArea()
+        cabecera.setText("")
+        val pie = new JTextArea()
+        pie.setText("")
+        val tabla = new JTable(iniTableroIU(dif), iniColumnasIU(dif))
+        
+        new JScrollPane()
+        ventana.getContentPane.add(new JScrollPane(cabecera), BorderLayout.NORTH)
+        ventana.getContentPane.add(new JScrollPane(pie), BorderLayout.SOUTH)
+        ventana.getContentPane.add(new JScrollPane(tabla), BorderLayout.CENTER)
+        ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+        ventana.setSize(new Dimension(600, 400))
+        ventana.setLocationRelativeTo(null)
+        ventana.setVisible(true)
+    
         val b:Int= modoAutomatico(3,0,dif, cabecera, tabla, pie)
         print("                       ---------         GAME OVER        ----------                                \n\n");
         println("Mejor Puntuacion: " + b)
