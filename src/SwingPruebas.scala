@@ -1,12 +1,70 @@
-import java.awt.BorderLayout
+/*import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Color
+import java.awt.Event._
 import javax.swing.JFrame
-import javax.swing.JScrollPane
 import javax.swing.JTextArea
 import javax.swing.JTable
+import javax.swing.JScrollPane
+import javax.swing.JButton
+import javax.swing.event._
+import javax.swing._*/
 
+
+import java.awt.Color
+import scala.swing._
+import scala.swing.event._
+
+//import java.awt.Component
+//import java.awt.event._
+
+/*abstract class KeyListener {
+  def keyPressed(event: KeyEvent)
+}
+
+trait KeyClickable {
+  def component: Component
+
+  def addKeyListener(kl: KeyListener) = component.addKeyListener(
+    new KeyAdapter {
+        override def keyPressed(e: KeyEvent) = kl.keyPressed(e)
+    })
+}
+
+class KeyIn extends KeyClickable{
+  
+}*/
+/*
+class tecladillo extends JFrame("Tecladillo"){
+  import javax.swing.JFrame._
+  
+  setDefaultCloseOperation(EXIT_ON_CLOSE);
+  setSize(200,200)
+  val button = new JButton("Hello world"); 
+   button addActionListener Print("Hello world"); 
+   getContentPane() add button; 
+
+   pack; 
+   setSize(400, 300); 
+   setVisible(true); 
+    
+   import java.awt.event._; 
+    
+   case class Print(msg : String) 
+    with ActionListener 
+    with Application { 
+      def actionPerformed(e : ActionEvent) = 
+         Console println msg 
+   }
+}
+*/
 object SwingPruebas extends App {
+  
+  //-------------- Entrada de datos ------------------------
+  
+  
+  
+  //--------------------------------------------------------
   
   def setLista(pos:Int, n:Int, l:List[Int]):List[Int] ={
   	if (l.length == 0) Nil
@@ -53,7 +111,7 @@ object SwingPruebas extends App {
     if (s == 0) Array()
     else Array("") ++ tituloVacioColumnas(s-1)
   }
-  
+  /*
   def actualizaTablaAux(tabla:JTable, l:List[Int], s:Int)(x:Int, y:Int):Unit ={
     if (l.length != 0) {
       if (x == s) {
@@ -104,5 +162,80 @@ object SwingPruebas extends App {
     //tabla.setValueAt("4", 1, 3)
     //tabla.setValueAt("2", 2, 3)
     //frame.getContentPane.add(new JScrollPane(new JTable(ListADobleArray(tab2, s), columnas)), BorderLayout.CENTER)
+
+    val tecladillo:JFrame = new JFrame("Tecladillo")
+    tecladillo.setSize(200, 200)
+    tecladillo.setLocationRelativeTo(null)
+    tecladillo.setLocation(0, 200)
+    tecladillo.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    tecladillo.setBackground(Color.DARK_GRAY)
+    
+    val botIzq:JButton = new JButton("<")
+    botIzq.setBackground(Color.YELLOW)
+    botIzq.setForeground(Color.BLUE)
+    //botIzq addActionListener textArea2.setText("boton izq");
+    tecladillo.getContentPane.add(botIzq, BorderLayout.WEST)
+    
+    val botDch:JButton = new JButton(">")
+    botDch.setBackground(Color.BLUE)
+    botDch.setForeground(Color.YELLOW)
+    tecladillo.getContentPane.add(botDch, BorderLayout.EAST)
+    
+    val botArb:JButton = new JButton("^")
+    botArb.setBackground(Color.RED)
+    botArb.setForeground(Color.GREEN)
+    tecladillo.getContentPane.add(botArb, BorderLayout.NORTH)
+    
+    val botAbj:JButton = new JButton("v")
+    botAbj.setBackground(Color.GREEN)
+    botAbj.setForeground(Color.RED)
+    tecladillo.getContentPane.add(botAbj, BorderLayout.SOUTH)
+    
+    tecladillo.setVisible(true)
+    
+    //escuchaTeclas(textArea2, botIzq, botDch, botArb, botAbj)
+    Thread.sleep(3000)*/
+  
+  val frame = new Frame{
+    title = "Hello world"
+    val status1 = new Button("1"){
+      maximumSize = new Dimension(80,80)
+      minimumSize = new Dimension(80,80)
+      background = Color.RED
+    }
+    val status2 = new Button("2"){
+      maximumSize = new Dimension(80,80)
+      minimumSize = new Dimension(80,80)
+      background = Color.YELLOW
+    }
+    val status3 = new Button("16384"){
+      maximumSize = new Dimension(80,80)
+      minimumSize = new Dimension(80,80)
+      background = Color.BLUE
+      foreground = Color.YELLOW
+    }
+    val box = new BoxPanel(Orientation.Horizontal) {
+      
+      contents += status1
+      contents += status2
+      contents += status3
+    }
+    
+    contents = new BoxPanel(Orientation.Vertical) {
+      contents += new Label("Launch rainbows:")
+      contents += new Button("Click me") {
+        reactions += {
+          case ButtonClicked(_) =>
+            println("All the colours!")
+        }
+      }
+      contents += box
+    }
+    
+    preferredSize = new Dimension(600, 400)
+    pack()
+    centerOnScreen()
+    open()
+  }
 
 }

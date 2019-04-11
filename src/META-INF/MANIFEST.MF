@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Specification-Vendor: org.scala-lang.modules
+Specification-Title: scala-swing
+Specification-Version: 2.1.0
+

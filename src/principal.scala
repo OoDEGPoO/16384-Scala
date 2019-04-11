@@ -1,10 +1,11 @@
-import java.awt.BorderLayout
-import java.awt.Dimension
-import java.awt.Color
-import javax.swing.JFrame
-import javax.swing.JScrollPane
-import javax.swing.JTextArea
-import javax.swing.JTable
+//import java.awt.BorderLayout
+//import java.awt.Dimension
+//import java.awt.Color
+//import javax.swing.JFrame
+//import javax.swing.JScrollPane
+//import javax.swing.JTextArea
+//import javax.swing.JTable
+
 
 object principal {
   
@@ -263,7 +264,7 @@ object principal {
   }
   
   def vidas(v:Int):String ={
-  	if (v == 0) "\n"
+  	if (v == 0) ""
   	else {" <3 " + vidas(v-1)}
   }
   
@@ -284,7 +285,7 @@ object principal {
   }
   
   def encabezadoIU(s:Int, p:Int, best:Int):String ={
-  	"Punt: " + p.toString + "\tMejor: " + best.toString + "\t(WASD para mover el tablero\tO para Salir)\n"
+  	"Punt: " + p.toString + "\tMejor: " + best.toString + "\t(WASD para mover el tablero\tO para Salir)"
   }
   
   def pieIU(v:Int):String ={
@@ -298,9 +299,9 @@ object principal {
   }
   
   def IU(l:List[Int], s:Int, v:Int, p:Int, b:Int, cabecera:JTextArea, tabla:JTable, pie:JTextArea):Unit ={
-  	print(encabezadoIU(s, p, b) + linea(s))
+  	print(encabezadoIU(s, p, b) + "\n" + linea(s))
   	imprimir(l, s)
-  	print(linea(s)+pieIU(v)+linea(s))
+  	print(linea(s)+pieIU(v) + "\n" +linea(s))
   	iuGrafica(l, s, v, p, b, cabecera, tabla, pie)
   }
   
@@ -504,28 +505,28 @@ object principal {
       dif match {
         case 1 => {
           val t:List[Int] = iniciaTablero(1)
-          IU(t, 4, 2, 0, best, cabecera, tabla, pie)
+          IU(t, 4, vidas, 0, best, cabecera, tabla, pie)
           val b:Int = mayor(partida(t , 4, vidas, 0, best, 1, cabecera, tabla, pie))(best)
           if (b >= 0) coin (vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 2 => {
           val t:List[Int] = iniciaTablero(2)
-          IU(t, 9, 2, 0, best, cabecera, tabla, pie)
+          IU(t, 9, vidas, 0, best, cabecera, tabla, pie)
           val b:Int = mayor(partida(t , 9, vidas, 0, best, 2, cabecera, tabla, pie))(best)
           if (b >= 0) coin (vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 3 => {
           val t:List[Int] = iniciaTablero(3)
-          IU(t, 14, 2, 0, best, cabecera, tabla, pie)
+          IU(t, 14, vidas, 0, best, cabecera, tabla, pie)
           val b:Int = mayor(partida(t , 14, vidas, 0, best, 3, cabecera, tabla, pie))(best)
           if (b >= 0) coin (vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 4 => {
           val t:List[Int] = iniciaTablero(4)
-          IU(t, 17, 2, 0, best, cabecera, tabla, pie)
+          IU(t, 17, vidas, 0, best, cabecera, tabla, pie)
           val b:Int = mayor(partida(t , 17, vidas, 0, best, 4, cabecera, tabla, pie))(best)
           if (b >= 0) coin (vidas-1, b, dif, cabecera, tabla, pie)
           else -b
@@ -540,28 +541,28 @@ object principal {
       dif match {
         case 1 => {
           val t:List[Int] = iniciaTablero(1)
-          IU(t, 4, 2, 0, best, cabecera, tabla, pie)
+          IU(t, 4, vidas, 0, best, cabecera, tabla, pie)
           val b:Int = mayor(partidaAuto(t , 4, vidas, 0, best, 1, cabecera, tabla, pie))(best)
           if (b >= 0) modoAutomatico(vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 2 => {
           val t:List[Int] = iniciaTablero(2)
-          IU(t, 9, 2, 0, best, cabecera, tabla, pie)
+          IU(t, 9, vidas, 0, best, cabecera, tabla, pie)
           val b:Int = mayor(partidaAuto(t , 9, vidas, 0, best, 2, cabecera, tabla, pie))(best)
           if (b >= 0) modoAutomatico(vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 3 => {
           val t:List[Int] = iniciaTablero(3)
-          IU(t, 14, 2, 0, best, cabecera, tabla, pie)
+          IU(t, 14, vidas, 0, best, cabecera, tabla, pie)
           val b:Int = mayor(partidaAuto(t , 14, vidas, 0, best, 3, cabecera, tabla, pie))(best)
           if (b >= 0) modoAutomatico(vidas-1, b, dif, cabecera, tabla, pie)
           else -b
         }
         case 4 => {
           val t:List[Int] = iniciaTablero(4)
-          IU(t, 17, 2, 0, best, cabecera, tabla, pie)
+          IU(t, 17, vidas, 0, best, cabecera, tabla, pie)
           val b:Int = mayor(partidaAuto(t , 17, vidas, 0, best, 4, cabecera, tabla, pie))(best)
           if (b >= 0) modoAutomatico(vidas-1, b, dif, cabecera, tabla, pie)
           else -b
@@ -587,7 +588,6 @@ object principal {
         pie.setText("")
         val tabla = new JTable(iniTableroIU(dif), iniColumnasIU(dif))
         
-        new JScrollPane()
         ventana.getContentPane.add(new JScrollPane(cabecera), BorderLayout.NORTH)
         ventana.getContentPane.add(new JScrollPane(pie), BorderLayout.SOUTH)
         ventana.getContentPane.add(new JScrollPane(tabla), BorderLayout.CENTER)
@@ -604,14 +604,13 @@ object principal {
       //Modo Automatico
       case 2 =>{
         val dif= dificultad()
-        val ventana = new JFrame("16384 en Scala")
+        val ventana = new JFrame("16384 en Scala (Modo Automático)")
         val cabecera = new JTextArea()
         cabecera.setText("")
         val pie = new JTextArea()
         pie.setText("")
         val tabla = new JTable(iniTableroIU(dif), iniColumnasIU(dif))
         
-        new JScrollPane()
         ventana.getContentPane.add(new JScrollPane(cabecera), BorderLayout.NORTH)
         ventana.getContentPane.add(new JScrollPane(pie), BorderLayout.SOUTH)
         ventana.getContentPane.add(new JScrollPane(tabla), BorderLayout.CENTER)
